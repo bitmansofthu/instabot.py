@@ -321,8 +321,7 @@ class InstaBot:
     def login_with_cookies(self, cookies):
         log_string = 'Trying to use cookies...\n'
         self.write_log(log_string)
-		
-		cookie_list = parse_dict_cookies(cookies)
+        cookie_list = self.parse_dict_cookies(cookies)
 		
         self.s.headers.update({
             'Accept': '*/*',
@@ -339,9 +338,9 @@ class InstaBot:
             'X-Requested-With': 'XMLHttpRequest'
         })
 
-        for key, value in cookie_list:
+        for key, value in cookie_list.iteritems():
     		self.s.cookies[key] = value
-    		self.write_log('%s %s' % key, value)
+    		self.write_log('%s %s' % (key, value))
     		
     	self.s.headers.update({'X-CSRFToken': cookie_list['csrftoken']})
         self.csrftoken = cookie_list['csrftoken']
@@ -360,15 +359,15 @@ class InstaBot:
             self.login_status = False
             self.write_log('Invalid cookies!')
             
-    def parse_dict_cookies(value):
+    def parse_dict_cookies(self, value):
     	result = {}
     	for item in value.split(';'):
         	item = item.strip()
         	if not item:
            		continue
         	if '=' not in item:
-            	result[item] = None
-            	continue
+        		result[item] = None
+        		continue
         	name, value = item.split('=', 1)
         	result[name] = value
     	return result
