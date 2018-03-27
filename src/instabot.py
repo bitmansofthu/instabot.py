@@ -915,9 +915,9 @@ class InstaBot:
                     log_string = "Checking user info.."
                     self.write_log(log_string)
 
-                    follows = user_info['follows']['count']
-                    follower = user_info['followed_by']['count']
-                    media = user_info['media']['count']
+                    follows = user_info['edge_follow']['count']
+                    follower = user_info['edge_followed_by']['count']
+                    media = user_info['edge_owner_to_timeline_media']['count']
                     follow_viewer = user_info['follows_viewer']
                     followed_by_viewer = user_info[
                         'followed_by_viewer']
