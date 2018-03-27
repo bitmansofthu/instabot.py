@@ -121,6 +121,9 @@ class InstaBot:
     def __init__(self,
                  login,
                  password,
+                 cookies,
+                 user_agent,
+                 accept_language,
                  like_per_day=1000,
                  media_max_like=50,
                  media_min_like=0,
@@ -159,8 +162,13 @@ class InstaBot:
         self.follows_db = sqlite3.connect(database_name, timeout=0, isolation_level=None)
         self.follows_db_c = self.follows_db.cursor()
         check_and_update(self)
-        fake_ua = UserAgent()
-        self.user_agent = check_and_insert_user_agent(self, str(fake_ua.random))
+        if not user_agent:
+        	fake_ua = UserAgent()
+        	self.user_agent = check_and_insert_user_agent(self, str(fake_ua.random))
+        else:
+        	self.user_agent = user_agent
+        if accept_language:
+        	self.accept_language = accept_language
         self.bot_start = datetime.datetime.now()
         self.start_at_h = start_at_h
         self.start_at_m = start_at_m
@@ -228,7 +236,10 @@ class InstaBot:
         log_string = 'Instabot v1.2.0 started at %s:\n' % \
                      (now_time.strftime("%d.%m.%Y %H:%M"))
         self.write_log(log_string)
-        self.login()
+        if cookies:
+        	self.login_with_cookies(cookies)
+        else:
+        	self.login()
         self.populate_user_blacklist()
         signal.signal(signal.SIGTERM, self.cleanup)
         atexit.register(self.cleanup)
@@ -306,6 +317,61 @@ class InstaBot:
                 self.write_log('Login error! Check your login data!')
         else:
             self.write_log('Login error! Connection error!')
+            
+    def login_with_cookies(self, cookies):
+        log_string = 'Trying to use cookies...\n'
+        self.write_log(log_string)
+		
+		cookie_list = parse_dict_cookies(cookies)
+		
+        self.s.headers.update({
+            'Accept': '*/*',
+            'Accept-Language': self.accept_language,
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Connection': 'keep-alive',
+            'Content-Length': '0',
+            'Host': 'www.instagram.com',
+            'Origin': 'https://www.instagram.com',
+            'Referer': 'https://www.instagram.com/',
+            'User-Agent': self.user_agent,
+            'X-Instagram-AJAX': '1',
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'X-Requested-With': 'XMLHttpRequest'
+        })
+
+        for key, value in cookie_list:
+    		self.s.cookies[key] = value
+    		self.write_log('%s %s' % key, value)
+    		
+    	self.s.headers.update({'X-CSRFToken': cookie_list['csrftoken']})
+        self.csrftoken = cookie_list['csrftoken']
+        
+        #ig_vw=1536; ig_pr=1.25; ig_vh=772; ig_or=landscape-primary;
+
+        r = self.s.get('https://www.instagram.com/')
+        finder = r.text.find(self.user_login)
+        if finder != -1:
+            ui = UserInfo()
+            self.user_id = ui.get_user_id_by_login(self.user_login)
+            self.login_status = True
+            log_string = '%s login success!' % (self.user_login)
+            self.write_log(log_string)
+        else:
+            self.login_status = False
+            self.write_log('Invalid cookies!')
+            
+    def parse_dict_cookies(value):
+    	result = {}
+    	for item in value.split(';'):
+        	item = item.strip()
+        	if not item:
+           		continue
+        	if '=' not in item:
+            	result[item] = None
+            	continue
+        	name, value = item.split('=', 1)
+        	result[name] = value
+    	return result
 
     def logout(self):
         now_time = datetime.datetime.now()
