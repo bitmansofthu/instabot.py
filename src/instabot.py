@@ -247,7 +247,7 @@ class InstaBot:
                                'invalid' % (user))
             else:
                 # prevent exception if user have no media
-                id_user = all_data['user']['id']
+                id_user = all_data['graphql']['user']['id']
                 # Update the user_name with the user_id
                 self.user_blacklist[user] = id_user
                 log_string = "Blacklisted user %s added with ID: %s" % (user,
@@ -421,7 +421,7 @@ class InstaBot:
                 try:
                     r = self.s.get(url_info)
                     all_data = json.loads(r.text)
-                    user_info = all_data['user']
+                    user_info = all_data['graphql']['user']
                     follows = user_info['follows']['count']
                     follower = user_info['followed_by']['count']
                     follow_viewer = user_info['follows_viewer']
@@ -845,7 +845,7 @@ class InstaBot:
                     r = self.s.get(url_tag)
                     all_data = json.loads(r.text)
 
-                    user_info = all_data['user']
+                    user_info = all_data['graphql']['user']
                     i = 0
                     log_string = "Checking user info.."
                     self.write_log(log_string)
