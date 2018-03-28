@@ -108,6 +108,7 @@ class InstaBot:
     media_on_feed = []
     media_by_user = []
     login_status = False
+    cookie_login = False
 
     # Running Times
     start_at_h = 0,
@@ -226,7 +227,10 @@ class InstaBot:
             self.s.proxies.update(proxies)
         # convert login to lower
         self.user_login = login.lower()
-        self.user_password = password
+        if not cookies:
+            self.user_password = password
+        else:
+            self.cookie_login = True
         self.bot_mode = 0
         self.media_by_tag = []
         self.media_on_feed = []
@@ -236,10 +240,10 @@ class InstaBot:
         log_string = 'Instabot v1.2.0 started at %s:\n' % \
                      (now_time.strftime("%d.%m.%Y %H:%M"))
         self.write_log(log_string)
-        if cookies:
-        	self.login_with_cookies(cookies)
+        if self.cookie_login:
+            self.login_with_cookies(cookies)
         else:
-        	self.login()
+            self.login()
         self.populate_user_blacklist()
         signal.signal(signal.SIGTERM, self.cleanup)
         atexit.register(self.cleanup)
@@ -322,7 +326,7 @@ class InstaBot:
         log_string = 'Trying to use cookies...\n'
         self.write_log(log_string)
         cookie_list = self.parse_dict_cookies(cookies)
-		
+        
         self.s.headers.update({
             'Accept': '*/*',
             'Accept-Language': self.accept_language,
@@ -339,11 +343,12 @@ class InstaBot:
         })
 
         for key, value in cookie_list.iteritems():
-    		self.s.cookies[key] = value
-    		self.write_log('%s %s' % (key, value))
-    		
-    	self.s.headers.update({'X-CSRFToken': cookie_list['csrftoken']})
+            self.s.cookies[key] = value
+            #self.write_log('%s %s' % (key, value))
+    
+        self.s.headers.update({'X-CSRFToken': cookie_list['csrftoken']})
         self.csrftoken = cookie_list['csrftoken']
+        self.write_log('Token: %s' % self.csrftoken)
         
         #ig_vw=1536; ig_pr=1.25; ig_vh=772; ig_or=landscape-primary;
 
@@ -360,17 +365,17 @@ class InstaBot:
             self.write_log('Invalid cookies!')
             
     def parse_dict_cookies(self, value):
-    	result = {}
-    	for item in value.split(';'):
-        	item = item.strip()
-        	if not item:
-           		continue
-        	if '=' not in item:
-        		result[item] = None
-        		continue
-        	name, value = item.split('=', 1)
-        	result[name] = value
-    	return result
+        result = {}
+        for item in value.split(';'):
+            item = item.strip()
+            if not item:
+                continue
+            if '=' not in item:
+                result[item] = None
+                continue
+            name, value = item.split('=', 1)
+            result[name] = value
+        return result
 
     def logout(self):
         now_time = datetime.datetime.now()
@@ -406,7 +411,7 @@ class InstaBot:
                 self.bot_follow_list.remove(f)
 
         # Logout
-        if self.login_status:
+        if self.login_status and (not self.cookie_login):
             self.logout()
 
     def get_media_id_by_tag(self, tag):
