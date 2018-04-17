@@ -825,6 +825,8 @@ class InstaBot:
             if check_unwanted(self,cUserName):
                 log_string = "This user is in unwanted usernames: %s" % (cUserName)
                 self.write_log(log_string)
+                self.next_iteration["Follow"] = time.time() + \
+                    self.add_time(self.follow_delay/2)
                 return
             log_string = "Trying to follow: %s" % (
                 self.media_by_tag[0]['node']["owner"]["id"])
