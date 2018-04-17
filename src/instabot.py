@@ -19,6 +19,7 @@ from .sql_updates import check_and_update, check_already_liked, check_already_fo
 from .sql_updates import insert_media, insert_username, insert_unfollow_count
 from .sql_updates import get_usernames_first, get_usernames, get_username_random
 from .sql_updates import check_and_insert_user_agent
+from src.username_checker import check_unwanted
 from fake_useragent import UserAgent
 
 class InstaBot:
@@ -55,7 +56,7 @@ class InstaBot:
     url_login = 'https://www.instagram.com/accounts/login/ajax/'
     url_logout = 'https://www.instagram.com/accounts/logout/'
     url_media_detail = 'https://www.instagram.com/p/%s/?__a=1'
-    url_user_detail = 'https://www.instagram.com/%s/?__a=1'
+    url_user_detail = 'https://www.instagram.com/%s/'
     api_user_detail = 'https://i.instagram.com/api/v1/users/%s/info/'
 
     user_agent = "" ""
@@ -252,17 +253,18 @@ class InstaBot:
         for user in self.user_blacklist:
             user_id_url = self.url_user_detail % (user)
             info = self.s.get(user_id_url)
+            js = info.text.split("window._sharedData = ")[1].split(";</script>")[0]
 
             # prevent error if 'Account of user was deleted or link is invalid
             from json import JSONDecodeError
             try:
-                all_data = json.loads(info.text)
+                all_data = json.loads(js)
             except JSONDecodeError as e:
                 self.write_log('Account of user %s was deleted or link is '
                                'invalid' % (user))
             else:
                 # prevent exception if user have no media
-                id_user = all_data['graphql']['user']['id']
+                id_user = all_data['entry_data']['ProfilePage'][0]['graphql']['user']['id']
                 # Update the user_name with the user_id
                 self.user_blacklist[user] = id_user
                 log_string = "Blacklisted user %s added with ID: %s" % (user,
@@ -490,8 +492,9 @@ class InstaBot:
                 url_info = self.url_user_detail % (username)
                 try:
                     r = self.s.get(url_info)
-                    all_data = json.loads(r.text)
-                    user_info = all_data['graphql']['user']
+                    js = r.text.split("window._sharedData = ")[1].split(";</script>")[0]
+                    all_data = json.loads(js)
+                    user_info = all_data['entry_data']['ProfilePage'][0]['graphql']['user']
                     follows = user_info['follows']['count']
                     follower = user_info['followed_by']['count']
                     follow_viewer = user_info['follows_viewer']
@@ -802,15 +805,26 @@ class InstaBot:
             del self.media_by_tag[0]
 
     def new_auto_mod_follow(self):
+        ccodeuserid = '0'
+        ccodmedia = '0'
+        
         if time.time() > self.next_iteration["Follow"] and \
                         self.follow_per_day != 0 and len(self.media_by_tag) > 0:
-            if self.media_by_tag[0]['node']["owner"]["id"] == self.user_id:
+            ccodmedia = self.media_by_tag[0]['node']['shortcode']
+            ccodeuserid = self.media_by_tag[0]['node']["owner"]["id"]
+            if ccodeuserid == self.user_id:
                 self.write_log("Keep calm - It's your own profile ;)")
                 return
+            ui = UserInfo()
+            cUserName = ui.get_user_by_media(ccodmedia)
             if check_already_followed(self, user_id=self.media_by_tag[0]['node']["owner"]["id"]) == 1:
-                self.write_log("Already followed before " + self.media_by_tag[0]['node']["owner"]["id"])
+                self.write_log("Already followed before " + cUserName)
                 self.next_iteration["Follow"] = time.time() + \
                                                 self.add_time(self.follow_delay/2)
+                return
+            if check_unwanted(self,cUserName):
+                log_string = "This user is in unwanted usernames: %s" % (cUserName)
+                self.write_log(log_string)
                 return
             log_string = "Trying to follow: %s" % (
                 self.media_by_tag[0]['node']["owner"]["id"])
@@ -913,9 +927,10 @@ class InstaBot:
                 url_tag = self.url_user_detail % (current_user)
                 try:
                     r = self.s.get(url_tag)
-                    all_data = json.loads(r.text)
+                    js = r.text.split("window._sharedData = ")[1].split(";</script>")[0]
+                    all_data = json.loads(js)
 
-                    user_info = all_data['graphql']['user']
+                    user_info = all_data['entry_data']['ProfilePage'][0]['graphql']['user']
                     i = 0
                     log_string = "Checking user info.."
                     self.write_log(log_string)

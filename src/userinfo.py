@@ -10,7 +10,8 @@ class UserInfo:
     '''
     user_agent = ("Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 "
                   "(KHTML, like Gecko) Chrome/48.0.2564.103 Safari/537.36")
-    url_user_info = "https://www.instagram.com/%s/?__a=1"
+    url_user_info = "https://www.instagram.com/%s/"
+    url_media_detail = 'https://www.instagram.com/p/%s/?__a=1'
     url_list = {
         "ink361": {
             "main": "http://ink361.com/",
@@ -38,9 +39,25 @@ class UserInfo:
     def get_user_id_by_login(self, user_name):
         url_info = self.url_user_info % (user_name)
         info = self.s.get(url_info)
-        all_data = json.loads(info.text)
-        id_user = all_data['graphql']['user']['id']
+        js = info.text.split("window._sharedData = ")[1].split(";</script>")[0]
+        #print json.dumps(js, indent=4, sort_keys=True)
+        all_data = json.loads(js)
+        id_user = all_data['entry_data']['ProfilePage'][0]['graphql']['user']['id']
         return id_user
+    
+    def get_user_by_media(self, media):
+        '''
+        Search user_name, if you don't have it.
+        '''
+        # just id
+        search_media = self.url_media_detail % media
+        x = self.s.get(search_media)
+        if x.status_code == 200:
+            r = json.loads(x.text)
+            cUserName = r["graphql"]["shortcode_media"]["owner"]["username"]
+            
+            return cUserName
+        return "Error in get_user_by_media"
 
     def search_user(self, user_id=None, user_name=None):
         '''

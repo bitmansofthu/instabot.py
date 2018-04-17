@@ -29,3 +29,9 @@ def username_checker(self):
     log_string = "\nSize of user info list : %i Size of ex user list : %i \n" % (
         len(self.user_info_list), len(self.ex_user_list))
     self.write_log(log_string)
+
+def check_unwanted(self,user_name):
+    for index in range(len(self.unwanted_username_list)):
+        if self.unwanted_username_list[index] in user_name:
+            return True
+    return False
