@@ -1,5 +1,6 @@
+ISSUE
+https://github.com/rarcega/instagram-scraper/issues/213
 HTTPError('403 Client Error: Forbidden for url: https://www.instagram.com/[[username]]/?__a=1',)
-
 It is possible to get the same information making the request without ?__a=1 and then extracting the data using:
-
 json.loads( res.text.split("window._sharedData = ")[1].split(";</script>")[0])
+DONE
