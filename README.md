@@ -1,6 +1,7 @@
 # InstaBot
 
 > Toolkit for building automated Instagram bots without direct access to the Instagram API or passsing through the review process.
+You can reuse browser session info (cookies/user-agent/accept-language) instead of login/password.
 
 [![Donate](https://img.shields.io/badge/PayPal-Donate-brightgreen.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=7BMM6JGE73322&lc=US)
 [![Chat on Telegram](https://img.shields.io/badge/Chat%20on-Telegram-brightgreen.svg)](https://t.me/joinchat/DYKH-0G_8hsDDoN_iE8ZlA)
@@ -10,6 +11,9 @@
 |:--------------------:|:---:|:----------------------------------------------------:|:--------------------------------:|
 | login                | str | Your instagram username                              |      |
 | password             | str | Your instagram password                              |      |
+| cookies              | str | Cookie string from browser http request header       |      |
+| user_agent           | str | User Agent string from browser http request header   |      |
+| accept_language      | str | Accept language string from browser http request     |      |
 | start\_at\_h         | int | Start program at the hour                            | 0    |
 | start\_at\_m         | int | Start program at the min                             | 0    |
 | end\_at\_h           | int | End program at the hour                              | 23   |
