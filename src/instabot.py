@@ -937,7 +937,7 @@ class InstaBot:
                     try:
                         user_info = all_data['entry_data']['ProfilePage'][0]['graphql']['user']
                     except:
-                        logging.debug(js)
+                        logging.error(js)
                         raise
                     
                     i = 0
