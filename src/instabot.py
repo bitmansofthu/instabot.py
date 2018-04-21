@@ -99,7 +99,6 @@ class InstaBot:
     self_follower = 0
 
     # Log setting.
-    logging.basicConfig(filename='errors.log', level=logging.INFO)
     log_file_path = ''
     log_file = 0
 
@@ -126,6 +125,8 @@ class InstaBot:
                  cookies,
                  user_agent,
                  accept_language,
+                 error_log_file='errors.log',
+                 error_log_level=logging.INFO,
                  like_per_day=1000,
                  media_max_like=50,
                  media_min_like=0,
@@ -164,6 +165,7 @@ class InstaBot:
         self.follows_db = sqlite3.connect(database_name, timeout=0, isolation_level=None)
         self.follows_db_c = self.follows_db.cursor()
         check_and_update(self)
+        logging.basicConfig(filename=error_log_file, format='%(asctime)s %(message)s', level=error_log_level)
         if not user_agent:
         	fake_ua = UserAgent()
         	self.user_agent = check_and_insert_user_agent(self, str(fake_ua.random))
@@ -931,8 +933,13 @@ class InstaBot:
                     r = self.s.get(url_tag)
                     js = r.text.split("window._sharedData = ")[1].split(";</script>")[0]
                     all_data = json.loads(js)
-
-                    user_info = all_data['entry_data']['ProfilePage'][0]['graphql']['user']
+                    
+                    try:
+                        user_info = all_data['entry_data']['ProfilePage'][0]['graphql']['user']
+                    except:
+                        logging.debug(js)
+                        raise
+                    
                     i = 0
                     log_string = "Checking user info.."
                     self.write_log(log_string)
