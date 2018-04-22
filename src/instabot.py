@@ -705,9 +705,13 @@ class InstaBot:
                     log_string = "Unfollowed: %s #%i." % (user_id,
                                                           self.unfollow_counter)
                     self.write_log(log_string)
+                else:
+					log_string = "Unfollow failed: #%i." % unfollow.status_code
+					self.write_log(log_string)
                 return unfollow
             except:
-                logging.exception("Exept on unfollow!")
+                logging.error("Failed to unfollow %s", self.current_user)
+            
         return False
 
     def unfollow_on_cleanup(self, user_id):
@@ -937,7 +941,7 @@ class InstaBot:
                     try:
                         user_info = all_data['entry_data']['ProfilePage'][0]['graphql']['user']
                     except:
-                        logging.error(js)
+                        logging.error("Failed to get user info : %s", current_user)
                         raise
                     
                     i = 0
