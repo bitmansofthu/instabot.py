@@ -3,6 +3,7 @@
 
 import json
 import requests
+from .util import get_json_from_shareddata
 
 class UserInfo:
     '''
@@ -39,7 +40,8 @@ class UserInfo:
     def get_user_id_by_login(self, user_name):
         url_info = self.url_user_info % (user_name)
         info = self.s.get(url_info)
-        js = info.text.split("window._sharedData = ")[1].split(";</script>")[0]
+        #js = info.text.split("window._sharedData = ")[1].split(";</script>")[0]
+        js = get_json_from_shareddata(info.text);
         #print json.dumps(js, indent=4, sort_keys=True)
         all_data = json.loads(js)
         id_user = all_data['entry_data']['ProfilePage'][0]['graphql']['user']['id']

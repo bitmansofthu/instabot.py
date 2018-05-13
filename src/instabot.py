@@ -18,9 +18,10 @@ import requests
 from .sql_updates import check_and_update, check_already_liked, check_already_followed
 from .sql_updates import insert_media, insert_username, insert_unfollow_count
 from .sql_updates import get_usernames_first, get_usernames, get_username_random
-from .sql_updates import check_and_insert_user_agent
+from .sql_updates import check_and_insert_user_agent, delete_user
 from src.username_checker import check_unwanted
 from fake_useragent import UserAgent
+from .util import get_json_from_shareddata
 
 class InstaBot:
     """
@@ -118,7 +119,7 @@ class InstaBot:
 
     # For new_auto_mod
     next_iteration = {"Like": 0, "Follow": 0, "Unfollow": 0, "Comments": 0}
-
+    
     def __init__(self,
                  login,
                  password,
@@ -687,8 +688,6 @@ class InstaBot:
                     log_string = "Followed: %s #%i." % (user_id,
                                                         self.follow_counter)
                     self.write_log(log_string)
-                    username = self.get_username_by_user_id(user_id=user_id)
-                    insert_username(self, user_id=user_id, username=username)
                 return follow
             except:
                 logging.exception("Except on follow!")
@@ -823,7 +822,7 @@ class InstaBot:
                 return
             ui = UserInfo()
             cUserName = ui.get_user_by_media(ccodmedia)
-            if check_already_followed(self, user_id=self.media_by_tag[0]['node']["owner"]["id"]) == 1:
+            if check_already_followed(self, user_id=ccodeuserid) == 1:
                 self.write_log("Already followed before " + cUserName)
                 self.next_iteration["Follow"] = time.time() + \
                                                 self.add_time(self.follow_delay/2)
@@ -834,16 +833,15 @@ class InstaBot:
                 self.next_iteration["Follow"] = time.time() + \
                     self.add_time(self.follow_delay/2)
                 return
-            log_string = "Trying to follow: %s" % (
-                self.media_by_tag[0]['node']["owner"]["id"])
+            log_string = "Trying to follow: %s" % (ccodeuserid)
             self.write_log(log_string)
 
-            if self.follow(self.media_by_tag[0]['node']["owner"]["id"]) != False:
-                self.bot_follow_list.append(
-                    [self.media_by_tag[0]['node']["owner"]["id"], time.time()])
-                self.next_iteration["Follow"] = time.time() + \
-                                                self.add_time(self.follow_delay)
-
+            if self.follow(ccodeuserid) != False:
+				insert_username(self, user_id=ccodeuserid, username=cUserName)
+				self.bot_follow_list.append([ccodeuserid, time.time()])
+				self.next_iteration["Follow"] = time.time() + self.add_time(self.follow_delay)
+				self.write_log("Followed username: %s" % cUserName);
+                
     def new_auto_mod_unfollow(self):
         if time.time() > self.next_iteration["Unfollow"] and self.unfollow_per_day != 0:
             if self.bot_mode == 0:
@@ -935,14 +933,17 @@ class InstaBot:
                 url_tag = self.url_user_detail % (current_user)
                 try:
                     r = self.s.get(url_tag)
-                    js = r.text.split("window._sharedData = ")[1].split(";</script>")[0]
+                    js = get_json_from_shareddata(r.text);
                     all_data = json.loads(js)
                     
                     try:
                         user_info = all_data['entry_data']['ProfilePage'][0]['graphql']['user']
                     except:
-                        logging.error("Failed to get user info : %s", current_user)
-                        raise
+						# delete from db to avoid retry
+						delete_user(self, username=current_user)
+						self.write_log("invalid user %s" % current_user)
+						logging.error("Failed to get user info : %s", current_user)
+						raise
                     
                     i = 0
                     log_string = "Checking user info.."
@@ -1000,7 +1001,7 @@ class InstaBot:
                         print('   >>>You are NOT following this account')
 
                 except:
-                    logging.exception("Except on auto_unfollow!")
+                    logging.exception("Except on auto_unfollow: %s" % current_user)
                     time.sleep(3)
                     return False
             else:

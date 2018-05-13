@@ -87,6 +87,19 @@ def insert_unfollow_count(self, user_id=False, username=False):
         self.follows_db_c.execute(qry)
     else:
         return False
+        
+def delete_user(self, user_id=False, username=False):
+    """ delete user from db """
+    if user_id:
+        qry = "DELETE FROM usernames \
+              WHERE username_id ='"+user_id+"'"
+        self.follows_db_c.execute(qry)
+    elif username:
+        qry = "DELETE FROM usernames \
+              WHERE username ='"+username+"'"
+        self.follows_db_c.execute(qry)
+    else:
+        return False
 
 def get_usernames_first(self):
     """ Gets first element of usernames table """
