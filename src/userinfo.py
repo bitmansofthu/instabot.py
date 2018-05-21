@@ -59,7 +59,8 @@ class UserInfo:
             cUserName = r["graphql"]["shortcode_media"]["owner"]["username"]
             
             return cUserName
-        return "Error in get_user_by_media"
+            
+        return False
 
     def search_user(self, user_id=None, user_name=None):
         '''

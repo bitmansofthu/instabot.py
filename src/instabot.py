@@ -822,6 +822,9 @@ class InstaBot:
                 return
             ui = UserInfo()
             cUserName = ui.get_user_by_media(ccodmedia)
+            if cUserName == False:
+				self.write_log("Failed to get username from media")
+				return
             if check_already_followed(self, user_id=ccodeuserid) == 1:
                 self.write_log("Already followed before " + cUserName)
                 self.next_iteration["Follow"] = time.time() + \
