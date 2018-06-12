@@ -48,7 +48,7 @@ class InstaBot:
     follows_db_c = None
 
     url = 'https://www.instagram.com/'
-    url_tag = 'https://www.instagram.com/explore/tags/%s/?__a=1'
+    url_tag = 'https://www.instagram.com/explore/tags/%s/'
     url_likes = 'https://www.instagram.com/web/likes/%s/like/'
     url_unlike = 'https://www.instagram.com/web/likes/%s/unlike/'
     url_comment = 'https://www.instagram.com/web/comments/%s/add/'
@@ -429,8 +429,8 @@ class InstaBot:
                 url_tag = self.url_tag % (tag)
                 try:
                     r = self.s.get(url_tag)
-                    all_data = json.loads(r.text)
-                    self.media_by_tag = list(all_data['graphql']['hashtag']['edge_hashtag_to_media']['edges'])
+                    all_data = json.loads(get_json_from_shareddata(r.text))
+                    self.media_by_tag = list(all_data['entry_data']['TagPage'][0]['graphql']['hashtag']['edge_hashtag_to_media']['edges'])
                 except:
                     self.media_by_tag = []
                     self.write_log("Except on get_media!")
