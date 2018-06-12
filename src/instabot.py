@@ -944,10 +944,12 @@ class InstaBot:
                     try:
                         user_info = all_data['entry_data']['ProfilePage'][0]['graphql']['user']
                     except:
-						# delete from db to avoid retry
+						# delete from db to avoid retry and try to unfollow
 						delete_user(self, username=current_user)
 						self.write_log("invalid user %s" % current_user)
 						logging.error("Failed to get user info : %s", current_user)
+						
+						self.unfollow(current_id)
 						raise
                     
                     i = 0
