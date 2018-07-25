@@ -758,10 +758,17 @@ class InstaBot:
     def new_auto_mod(self):
         while True:
             now = datetime.datetime.now()
-            if (
-                    datetime.time(self.start_at_h, self.start_at_m) <= now.time()
-                    and now.time() <= datetime.time(self.end_at_h, self.end_at_m)
-            ):
+            now_time = now.time()
+            start_time = datetime.time(self.start_at_h, self.start_at_m)
+            end_time = datetime.time(self.end_at_h, self.end_at_m)
+            
+            is_between_time = False
+            if (start_time <= end_time):
+                is_between_time = start_time <= now_time and end_time > now_time
+            else:
+                is_between_time = start_time <= now_time or end_time > now_time
+				
+            if (is_between_time):
                 # ------------------- Get media_id -------------------
                 if len(self.media_by_tag) == 0:
                     self.get_media_id_by_tag(random.choice(self.tag_list))
@@ -781,9 +788,8 @@ class InstaBot:
                 time.sleep(3)
                 # print("Tic!")
             else:
-                print("sleeping until {hour}:{min}".format(hour=self.start_at_h,
-                                                           min=self.start_at_m), end="\r")
-                time.sleep(100)
+                self.write_log("sleeping until " + str(start_time))
+                time.sleep(2 * 60)
 
     def remove_already_liked(self):
         self.write_log("Removing already liked medias..")
