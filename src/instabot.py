@@ -968,8 +968,8 @@ class InstaBot:
                 follows = user_info['edge_follow']['count']
                 follower = user_info['edge_followed_by']['count']
                 media = user_info['edge_owner_to_timeline_media']['count']
-                last_media_age = (datetime.datetime.now() - \
-                            datetime.datetime.utcfromtimestamp(user_info['edge_owner_to_timeline_media']['edges'][0]['node']['taken_at_timestamp'])).days
+                last_media_ts = user_info['edge_owner_to_timeline_media']['edges'][0]['node']['taken_at_timestamp']
+                last_media_age = (datetime.datetime.now() - datetime.datetime.utcfromtimestamp(last_media_ts)).days
                 follow_viewer = user_info['follows_viewer']
                 followed_by_viewer = user_info[
                     'followed_by_viewer']
@@ -983,7 +983,7 @@ class InstaBot:
                 self.write_log(log_string)
                 log_string = "Media : %i" % (media)
                 self.write_log(log_string)
-                log_string = "Last Media Age : %d" % (last_media_age)
+                log_string = "Last Media Age : %i days, ts: %d" % (last_media_age, last_media_ts)
                 self.write_log(log_string)
                 
                 # follows == 0 or  follower / follows > 2
