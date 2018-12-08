@@ -109,6 +109,14 @@ def get_usernames_first(self):
     else:
         return False
 
+def get_usernames_last(self):
+    """ Gets last element of usernames table """
+    username = self.follows_db_c.execute("SELECT * FROM usernames WHERE unfollow_count=0 LIMIT 1").fetchone()
+    if username:
+        return username
+    else:
+        return False
+
 def get_usernames(self):
     """ Gets usernames table """
     usernames = self.follows_db_c.execute("SELECT * FROM usernames")

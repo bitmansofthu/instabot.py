@@ -17,7 +17,7 @@ import time
 import requests
 from .sql_updates import check_and_update, check_already_liked, check_already_followed
 from .sql_updates import insert_media, insert_username, insert_unfollow_count
-from .sql_updates import get_usernames_first, get_usernames, get_username_random
+from .sql_updates import get_usernames_first, get_usernames_last, get_usernames, get_username_random
 from .sql_updates import check_and_insert_user_agent, delete_user
 from src.username_checker import check_unwanted
 from fake_useragent import UserAgent
@@ -987,7 +987,7 @@ class InstaBot:
                 self.write_log(log_string)
                 
                 # follows == 0 or  follower / follows > 2
-                if follower >= self.max_user_followers:
+                if follows == 0 or follower >= self.max_user_followers:
                     self.is_selebgram = True
                     self.is_fake_account = False
                     print('   >>>This is probably Selebgram account')
@@ -1033,13 +1033,15 @@ class InstaBot:
     def auto_unfollow(self):
         checking = True
         while checking:
-            username_row = get_username_random(self)
+            username_row = get_usernames_last(self)
             if not username_row:
                 self.write_log("Looks like there is nobody to unfollow.")
                 return False
             current_id = username_row[0]
             current_user = username_row[1]
             unfollow_count = username_row[2]
+
+            #print(username_row)
 
             if not current_user:
                 current_user = self.get_username_by_user_id(user_id=current_id)
