@@ -877,6 +877,7 @@ class InstaBot:
                     self.is_selebgram is False
                     and self.is_fake_account is False
                     and self.is_active_user is True
+                    and self.is_following is False
             ):
                 followed = self.follow(ccodeuserid)
                 if followed != False:
