@@ -55,10 +55,13 @@ class UserInfo:
         search_media = self.url_media_detail % media
         x = self.s.get(search_media)
         if x.status_code == 200:
-            r = json.loads(get_json_from_shareddata(x.text))
-            cUserName = r["entry_data"]["PostPage"][0]["graphql"]["shortcode_media"]["owner"]["username"]
-            
-            return cUserName
+            try:
+                r = json.loads(get_json_from_shareddata(x.text))
+                cUserName = r["entry_data"]["PostPage"][0]["graphql"]["shortcode_media"]["owner"]["username"]
+
+                return cUserName
+            except:
+                return False
             
         return False
 
