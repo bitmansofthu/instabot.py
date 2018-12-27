@@ -1034,7 +1034,7 @@ class InstaBot:
     def auto_unfollow(self):
         checking = True
         while checking:
-            username_row = get_usernames_last(self)
+            username_row = get_username_random(self)
             if not username_row:
                 self.write_log("Looks like there is nobody to unfollow.")
                 return False
