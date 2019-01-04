@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import sqlite3
 from datetime import datetime, time
+from random import randint
 
 def check_and_update(self):
     """ At the Program start, i does look for the sql updates """
@@ -109,11 +110,16 @@ def get_usernames_first(self):
     else:
         return False
 
-def get_usernames_last(self):
+def get_username_random_min(self, minfollowers):
     """ Gets last element of usernames table """
-    username = self.follows_db_c.execute("SELECT * FROM usernames WHERE unfollow_count=0 LIMIT 1").fetchone()
-    if username:
-        return username
+    usernames = self.follows_db_c.execute("SELECT * FROM usernames WHERE unfollow_count=0").fetchall()
+    if usernames:
+        unsize = len(usernames)
+        if unsize > minfollowers:
+            return usernames[randint(0,unsize / 2)]
+        else:
+            print "Not enough followed %d min %d" % (unsize, minfollowers)
+            pass
     else:
         return False
 

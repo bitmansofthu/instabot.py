@@ -17,7 +17,7 @@ import time
 import requests
 from .sql_updates import check_and_update, check_already_liked, check_already_followed
 from .sql_updates import insert_media, insert_username, insert_unfollow_count
-from .sql_updates import get_usernames_first, get_usernames_last, get_usernames, get_username_random
+from .sql_updates import get_usernames_first, get_username_random_min, get_usernames, get_username_random
 from .sql_updates import check_and_insert_user_agent, delete_user
 from src.username_checker import check_unwanted
 from fake_useragent import UserAgent
@@ -839,7 +839,7 @@ class InstaBot:
         
         if time.time() > self.next_iteration["Follow"] and \
                         self.follow_per_day != 0 and len(self.media_by_tag) > 0:
-            rnd = random.randint(1, len(self.media_by_tag) - 2)
+            rnd = random.randint(0, len(self.media_by_tag) - 1)
             ccodmedia = self.media_by_tag[rnd]['node']['shortcode']
             ccodeuserid = self.media_by_tag[rnd]['node']["owner"]["id"]
             if ccodeuserid == self.user_id:
@@ -1035,6 +1035,7 @@ class InstaBot:
         checking = True
         while checking:
             username_row = get_username_random(self)
+            #username_row = get_username_random_min(self, self.unfollow_per_day / 2)
             if not username_row:
                 self.write_log("Looks like there is nobody to unfollow.")
                 return False
