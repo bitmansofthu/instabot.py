@@ -526,7 +526,7 @@ class InstaBot:
 
         if self.login_status:
             if self.media_by_tag != 0:
-                i = random.randint(1, len(self.media_by_tag) - (len(self.media_by_tag) / 3))
+                i = random.randint(1, len(self.media_by_tag) / 3)
                 for d in self.media_by_tag:
                     if i >= len(self.media_by_tag):
                         i = 0
@@ -538,15 +538,15 @@ class InstaBot:
                         taken_at = self.media_by_tag[i]['node']['taken_at_timestamp']
                         media_age = (datetime.datetime.now() - \
                             datetime.datetime.utcfromtimestamp(taken_at)).days
-                        print(">> Media %i. %s likes: %d age: %d days timestamp: %d" % (i, self.media_by_tag[i]['node']['id'], l_c, media_age, taken_at))
-                        if ((l_c <= self.media_max_like and
+                        print(">> Media %i. %s likes: %d age: %d days max: %d days timestamp: %d" % (i, self.media_by_tag[i]['node']['id'], l_c, media_age, self.media_max_age, taken_at))
+                        if (((l_c <= self.media_max_like and
                              l_c >= self.media_min_like) or
                             (self.media_max_like == 0 and
                              l_c >= self.media_min_like) or
                             (self.media_min_like == 0 and
                              l_c <= self.media_max_like) or
                             (self.media_min_like == 0 and
-                             self.media_max_like == 0)
+                             self.media_max_like == 0))
                              and 
                              (self.media_max_age == 0 or media_age <= self.media_max_age)):
                             for blacklisted_user_name, blacklisted_user_id in self.user_blacklist.items(
