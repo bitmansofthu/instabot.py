@@ -525,8 +525,8 @@ class InstaBot:
         """ Like all media ID that have self.media_by_tag """
 
         if self.login_status:
-            if self.media_by_tag != 0:
-                i = random.randint(1, len(self.media_by_tag) / 3)
+            if self.media_by_tag != 0 and len(self.media_by_tag) > 3:
+                i = random.randint(0, len(self.media_by_tag) / 3)
                 for d in self.media_by_tag:
                     if i >= len(self.media_by_tag):
                         i = 0
