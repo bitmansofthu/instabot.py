@@ -526,7 +526,7 @@ class InstaBot:
 
         if self.login_status:
             if self.media_by_tag != 0 and len(self.media_by_tag) > 3:
-                i = random.randint(0, len(self.media_by_tag) / 3)
+                i = 0
                 for d in self.media_by_tag:
                     if i >= len(self.media_by_tag):
                         i = 0
