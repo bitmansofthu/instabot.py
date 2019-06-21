@@ -599,8 +599,8 @@ class InstaBot:
                                 logging.exception("Except on like_all_exist_media")
                                 return False
 
-                            log_string = "Trying to like media: %s" % \
-                                         (self.media_by_tag[i]['node']['id'])
+                            log_string = "Trying to like media: %s https://www.instagram.com/p/%s" % \
+                                         (self.media_by_tag[i]['node']['id'], self.media_by_tag[i]['node']['shortcode'])
                             self.write_log(log_string)
                             like = self.like(self.media_by_tag[i]['node']['id'])
                             # comment = self.comment(self.media_by_tag[i]['id'], 'Cool!')
