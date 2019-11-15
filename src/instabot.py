@@ -126,6 +126,7 @@ class InstaBot:
                  cookies,
                  user_agent,
                  accept_language,
+                 ig_extra_headers,
                  error_log_file='errors.log',
                  error_log_level=logging.INFO,
                  like_per_day=1000,
@@ -178,6 +179,8 @@ class InstaBot:
         	self.user_agent = user_agent
         if accept_language:
         	self.accept_language = accept_language
+        if ig_extra_headers:
+			self.ig_extra_headers = ig_extra_headers
         self.bot_start = datetime.datetime.now()
         self.start_at_h = start_at_h
         self.start_at_m = start_at_m
@@ -301,7 +304,9 @@ class InstaBot:
             'Origin': 'https://www.instagram.com',
             'Referer': 'https://www.instagram.com/',
             'User-Agent': self.user_agent,
-            'X-Instagram-AJAX': '1',
+            'x-instagram-ajax': self.ig_ajax_id,
+            'x-ig-app-id': self.ig_appid,
+            'x-ig-www-claim': self.ig_www_claim, 
             'Content-Type': 'application/x-www-form-urlencoded',
             'X-Requested-With': 'XMLHttpRequest'
         })
@@ -354,6 +359,9 @@ class InstaBot:
             'Content-Type': 'application/x-www-form-urlencoded',
             'X-Requested-With': 'XMLHttpRequest'
         })
+        
+        if (self.ig_extra_headers):
+			self.s.headers.update(self.ig_extra_headers)
 
         for key, value in cookie_list.iteritems():
             self.s.cookies[key] = value
