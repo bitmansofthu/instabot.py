@@ -665,11 +665,15 @@ class InstaBot:
 
     def like(self, media_id):
         """ Send http request to like media by ID """
-        if self.login_status:
+        if self.login_status:		
             url_likes = self.url_likes % (media_id)
             try:
-                like = self.s.post(url_likes)
-                last_liked_media_id = media_id
+				req = self.s.get(url_likes)
+				if req.status_code == 200:
+					like = self.s.post(url_likes)
+					last_liked_media_id = media_id
+				else:
+					self.write_log('Failed to open media page!')
             except:
                 logging.exception("Except on like!")
                 like = 0
