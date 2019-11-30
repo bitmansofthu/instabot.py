@@ -610,6 +610,10 @@ class InstaBot:
                             log_string = "Trying to like media: %s https://www.instagram.com/p/%s" % \
                                          (self.media_by_tag[i]['node']['id'], self.media_by_tag[i]['node']['shortcode'])
                             self.write_log(log_string)
+                            webreq = self.s.get("https://www.instagram.com/p/%s" % (self.media_by_tag[i]['node']['shortcode']))
+                            if webreq.status_code != 200:
+                                self.write_log("Media webpage returned with code: %d" % (webreq.status_code))
+                                return False
                             like = self.like(self.media_by_tag[i]['node']['id'])
                             # comment = self.comment(self.media_by_tag[i]['id'], 'Cool!')
                             # follow = self.follow(self.media_by_tag[i]["owner"]["id"])
@@ -668,12 +672,8 @@ class InstaBot:
         if self.login_status:		
             url_likes = self.url_likes % (media_id)
             try:
-				req = self.s.get(url_likes)
-				if req.status_code == 200:
-					like = self.s.post(url_likes)
-					last_liked_media_id = media_id
-				else:
-					self.write_log('Failed to open media page!')
+				like = self.s.post(url_likes)
+				last_liked_media_id = media_id
             except:
                 logging.exception("Except on like!")
                 like = 0
